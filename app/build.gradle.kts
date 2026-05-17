@@ -45,10 +45,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    aarMetadata {
-        minCompileSdk = 26
-        minAgpVersion = "8.7.3"
-    }
 }
 
 dependencies {

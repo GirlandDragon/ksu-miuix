@@ -27,6 +27,8 @@ jobs:
       - name: Accept licenses & install SDK platforms
         run: |
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          echo "Available SDK platforms:"
+          sdkmanager --list 2>/dev/null | grep "platforms;android" || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Setup Gradle
