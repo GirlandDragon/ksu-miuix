@@ -45,10 +45,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
-
-afterEvaluate {
-    tasks.matching { it.name.contains("checkAarMetadata") }.configureEach { enabled = false }
+    aarMetadata {
+        minCompileSdk = 26
+        minAgpVersion = "8.7.3"
+    }
 }
 
 dependencies {
