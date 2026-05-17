@@ -26,8 +26,8 @@ jobs:
 
       - name: Accept licenses & install SDK platforms
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-37"
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platforms;android-37" "build-tools;37.0.0"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
