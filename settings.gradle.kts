@@ -18,8 +18,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "ksu-miuix"
 include(":app")
-
-// Disable AAR metadata check for miuix-ui which requires compileSdk 37
-gradle.projectsEvaluated {
-    it.extra.set("android.experimental.checkAarMetadata", "false")
-}
