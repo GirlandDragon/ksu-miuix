@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.ksu.miuix"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.ksu.miuix"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -45,8 +45,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
-    tasks.matching { it.name.contains("checkAarMetadata") }.configureEach { enabled = false }
 }
 
 dependencies {
