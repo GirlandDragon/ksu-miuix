@@ -35,9 +35,7 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-            freeCompilerArgs += listOf(
-                "-Xopt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi",
-            )
+            freeCompilerArgs.add("-Xopt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
         }
     }
 
