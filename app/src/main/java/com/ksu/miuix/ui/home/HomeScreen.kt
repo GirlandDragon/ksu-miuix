@@ -49,9 +49,9 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
     var showRebootDialog by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
-        kernelVersion = Shell.su("uname -r").getOrNull()?.trim() ?: "未知"
-        androidVersion = Shell.su("getprop ro.build.version.release").getOrNull()?.trim() ?: "未知"
-        deviceModel = Shell.su("getprop ro.product.model").getOrNull()?.trim() ?: "未知"
+        kernelVersion = Shell.su("uname -r").stdout.ifEmpty { "未知" }
+        androidVersion = Shell.su("getprop ro.build.version.release").stdout.ifEmpty { "未知" }
+        deviceModel = Shell.su("getprop ro.product.model").stdout.ifEmpty { "未知" }
 
         ksuStatus = if (kernelVersion.contains("KSU")) {
             KsuStatus.Active(kernelVersion)
@@ -104,8 +104,8 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
 
         Card {
             ActionRow(Icons.Default.RestartAlt, "重启设备", "执行 reboot 重启系统") { showRebootDialog = 1 }
-            ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { Shell.su("pkill -f com.android.systemui").exec() }
-            ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { Shell.su("rm -rf /data/data/*/cache/* 2>/dev/null").exec() }
+            ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { Shell.exec("pkill -f com.android.systemui") }
+            ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null") }
         }
     }
 
@@ -116,7 +116,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
         onDismissRequest = { showRebootDialog = 0 },
     ) {
         TextButton(text = "取消", onClick = { showRebootDialog = 0 })
-        Button(onClick = { Shell.su("reboot").exec(); showRebootDialog = 0 }) { Text(text = "重启") }
+        Button(onClick = { Shell.exec("reboot"); showRebootDialog = 0 }) { Text(text = "重启") }
     }
 }
 

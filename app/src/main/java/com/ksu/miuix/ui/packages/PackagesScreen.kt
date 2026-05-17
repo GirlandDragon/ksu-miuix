@@ -19,9 +19,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import coil.compose.AsyncImage
 import com.ksu.miuix.shell.PackageInfo
 import com.ksu.miuix.shell.Shell
+import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.SmallTitle
@@ -32,7 +33,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.ForcePause
+import androidx.compose.material.icons.filled.PauseCircleOutline
 import androidx.compose.material.icons.filled.DeleteSweep
 
 private val ItemPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
@@ -122,11 +123,11 @@ fun PackagesScreen(paddingValues: PaddingValues) {
             }
             TextButton(text = "关闭", onClick = { selectedPackage = null })
             Button(onClick = {
-                Shell.su("am force-stop ${pkg.packageName}").exec()
+                Shell.exec("am force-stop ${pkg.packageName}")
                 selectedPackage = null
             }) { Text(text = "强制停止") }
             Button(onClick = {
-                Shell.su("pm clear ${pkg.packageName}").exec()
+                Shell.exec("pm clear ${pkg.packageName}")
                 selectedPackage = null
             }) { Text(text = "清除数据") }
         }

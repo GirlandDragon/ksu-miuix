@@ -21,7 +21,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material.icons.filled.Console
 
 @Composable
 fun KsuMiuixApp() {
@@ -55,7 +55,7 @@ fun KsuMiuixApp() {
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    icon = Icons.Default.Terminal,
+                    icon = Icons.Default.Console,
                     label = "终端",
                 )
             }

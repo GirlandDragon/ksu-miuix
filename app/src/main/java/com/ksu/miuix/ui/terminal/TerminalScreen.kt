@@ -2,6 +2,7 @@ package com.ksu.miuix.ui.terminal
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -96,24 +98,26 @@ fun TerminalScreen(paddingValues: PaddingValues) {
         }
 
         Card {
-            Row(
+            Box(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalArrangement = Arrangement.CenterVertically,
+                contentAlignment = Alignment.CenterStart,
             ) {
-                Text(
-                    text = "# ",
-                    color = Color(0xFF4788FF),
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 14.sp,
-                )
-                Text(
-                    text = if (inputText.isEmpty()) "输入 shell 命令..." else inputText,
-                    modifier = Modifier.weight(1f).padding(start = 4.dp),
-                    style = MiuixTheme.textStyles.body1,
-                    color = if (inputText.isEmpty()) MiuixTheme.colorScheme.disabledOnSurface else MiuixTheme.colorScheme.onSurface,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 14.sp,
-                )
+                Row {
+                    Text(
+                        text = "# ",
+                        color = Color(0xFF4788FF),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 14.sp,
+                    )
+                    Text(
+                        text = if (inputText.isEmpty()) "输入 shell 命令..." else inputText,
+                        modifier = Modifier.weight(1f).padding(start = 4.dp),
+                        style = MiuixTheme.textStyles.body1,
+                        color = if (inputText.isEmpty()) MiuixTheme.colorScheme.disabledOnSurface else MiuixTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 14.sp,
+                    )
+                }
             }
         }
 
