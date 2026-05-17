@@ -48,22 +48,22 @@ android {
 }
 
 dependencies {
-    implementation(libs.miuix.ui)
-    implementation(libs.miuix.icons)
-    implementation(libs.core.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.lifecycle.viewmodel.compose)
-    implementation(libs.activity.compose)
+    implementation(libs.miuixUi)
+    implementation(libs.miuixIcons)
+    implementation(libs.coreKtx)
+    implementation(libs.lifecycleRuntimeKtx)
+    implementation(libs.lifecycleViewmodelCompose)
+    implementation(libs.activityCompose)
 
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.ui.graphics)
-    implementation(libs.compose.ui.tooling.preview)
-    implementation(libs.compose.foundation)
-    implementation(libs.compose.material.icons.extended)
-    implementation(libs.compose.material3)
-    implementation(libs.navigation.compose)
-    implementation(libs.coil.compose)
+    implementation(platform(libs.composeBom))
+    implementation(libs.composeUi)
+    implementation(libs.composeUiGraphics)
+    implementation(libs.composeUiToolingPreview)
+    implementation(libs.composeFoundation)
+    implementation(libs.composeMaterialIconsExtended)
+    implementation(libs.composeMaterial3)
+    implementation(libs.navigationCompose)
+    implementation(libs.coilCompose)
 
-    debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.composeUiTooling)
 }
