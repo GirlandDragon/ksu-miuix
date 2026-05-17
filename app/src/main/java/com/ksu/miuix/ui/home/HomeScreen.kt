@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.ksu.miuix.shell.Shell
 
@@ -146,7 +147,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
 
 @Composable
 private fun StatusRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     summary: String,
     isActive: Boolean = false,
@@ -170,7 +171,7 @@ private fun StatusRow(
 }
 
 @Composable
-private fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, summary: String) {
+private fun InfoRow(icon: ImageVector, title: String, summary: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(ItemPadding),
         verticalAlignment = Alignment.CenterVertically,
@@ -185,7 +186,7 @@ private fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title
 
 @Composable
 private fun ActionRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     summary: String,
     onClick: () -> Unit,
