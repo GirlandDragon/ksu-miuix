@@ -17,8 +17,8 @@ import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -143,11 +143,6 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
 }
 
 @Composable
-private fun Button(onClick: () -> Unit, content: @Composable () -> Unit) {
-    androidx.compose.material3.Button(onClick = onClick, content = content)
-}
-
-@Composable
 private fun StatusRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
@@ -195,7 +190,6 @@ private fun ActionRow(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = CardDefaults.shape(),
         onClick = onClick,
     ) {
         Row(
