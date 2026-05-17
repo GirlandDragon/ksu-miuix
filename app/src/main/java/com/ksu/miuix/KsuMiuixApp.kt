@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.ksu.miuix.ui.home.HomeScreen
 import com.ksu.miuix.ui.packages.PackagesScreen
-import com.ksu.miuix.ui.terminal.TerminalScreen
+import com.ksu.miuix.ui.settings.SettingsScreen
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -37,7 +37,7 @@ fun KsuMiuixApp() {
                         when (selectedTab) {
                             0 -> "KernelSU"
                             1 -> "应用管理"
-                            else -> "终端"
+                            else -> "设置"
                         }
                     )
                 },
@@ -61,7 +61,7 @@ fun KsuMiuixApp() {
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text("终端") },
+                    label = { Text("设置") },
                 )
             }
         },
@@ -69,7 +69,7 @@ fun KsuMiuixApp() {
         when (selectedTab) {
             0 -> HomeScreen(paddingValues, onAboutClick = { showAboutDialog = true })
             1 -> PackagesScreen(paddingValues)
-            2 -> TerminalScreen(paddingValues)
+            2 -> SettingsScreen(paddingValues)
         }
     }
 
@@ -79,7 +79,7 @@ fun KsuMiuixApp() {
             title = { Text("关于") },
             text = {
                 Text(
-                    "KernelSU MD3E\n基于 Material 3 Expressive 设计语言构建\n\n使用 androidx.compose.material3 库"
+                    "KernelSU MD3E\n基于 Material 3 Expressive 设计语言构建\n\n版本: 1.0.0"
                 )
             },
             confirmButton = {
