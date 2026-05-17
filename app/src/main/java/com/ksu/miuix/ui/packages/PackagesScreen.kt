@@ -116,6 +116,10 @@ fun PackagesScreen(paddingValues: PaddingValues) {
                 items(filteredPackages, key = { it.packageName }) { pkg ->
                     PackageItem(pkg, onClick = { selectedPackage = pkg })
                 }
+            }
+        }
+    }
+
     if (showForceStopDialog && selectedPackage != null) {
         AlertDialog(
             onDismissRequest = { showForceStopDialog = false },
@@ -134,8 +138,6 @@ fun PackagesScreen(paddingValues: PaddingValues) {
                 TextButton(onClick = { showForceStopDialog = false }) { Text("取消") }
             },
         )
-    }
-}
     }
 
     selectedPackage?.let { pkg ->

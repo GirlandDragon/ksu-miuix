@@ -167,7 +167,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             confirmButton = {
                 Button(onClick = {
                     scope.launch {
-                        Shell.exec("for d in /data/data/*/cache; do rm -rf \"$d\" 2>/dev/null; done")
+                        Shell.exec("find /data/data/*/cache -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null \\;")
                     }
                     showClearCacheDialog = 0
                 }) { Text("确认清除") }
