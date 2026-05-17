@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,11 +26,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import java.net.HttpURLConnection
 import java.net.URL
 
 private const val APP_VERSION_URL = "https://raw.githubusercontent.com/GirlandDragon/ksu-miuix/main/app_version"
 private const val CURRENT_VERSION = "1.0.0"
+private const val REQUEST_TIMEOUT_MS = 10_000L
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -140,18 +144,85 @@ fun SettingsScreen(paddingValues: PaddingValues) {
     }
 }
 
-private suspend fun checkUpdate(): UpdateResult = try {
-    val remoteVersion = URL(APP_VERSION_URL).readText().trim()
-    if (remoteVersion.isBlank()) {
-        UpdateResult.Error("服务器返回空内容")
-    } else if (remoteVersion != CURRENT_VERSION) {
-        UpdateResult.NewVersion(remoteVersion)
-    } else {
-        UpdateResult.Latest
+private suspend fun checkUpdate(): UpdateResult = withContext(Dispatchers.IO) {
+    try {
+        val rawBody = withTimeoutOrNull(REQUEST_TIMEOUT_MS) {
+            fetchRemoteText(APP_VERSION_URL)
+        } ?: return@withContext UpdateResult.Error("连接超时 (${REQUEST_TIMEOUT_MS / 1000}s)，请检查网络")
+
+        val remoteVersion = rawBody.trim()
+        if (remoteVersion.isBlank()) {
+            return@withContext UpdateResult.Error("服务器返回空内容，请稍后重试")
+        }
+
+        val current = parseSemanticVersion(CURRENT_VERSION)
+        val remote = parseSemanticVersion(remoteVersion)
+
+        if (current == null || remote == null) {
+            return@withContext if (remoteVersion != CURRENT_VERSION) {
+                UpdateResult.NewVersion(remoteVersion)
+            } else {
+                UpdateResult.Latest
+            }
+        }
+
+        if (isNewer(remote, current)) {
+            UpdateResult.NewVersion(remoteVersion)
+        } else {
+            UpdateResult.Latest
+        }
+    } catch (e: java.net.SocketTimeoutException) {
+        UpdateResult.Error("网络超时，请检查网络连接后重试")
+    } catch (e: java.net.UnknownHostException) {
+        UpdateResult.Error("无法解析域名，请检查网络或 DNS 设置")
+    } catch (e: java.net.ConnectException) {
+        UpdateResult.Error("无法连接服务器，请检查网络连接")
+    } catch (e: javax.net.ssl.SSLException) {
+        UpdateResult.Error("SSL 连接失败，请检查系统时间或网络环境")
+    } catch (e: Exception) {
+        UpdateResult.Error(e.message ?: "未知错误，请稍后重试")
     }
-} catch (e: Exception) {
-    UpdateResult.Error(e.message ?: "未知错误")
 }
+
+private fun fetchRemoteText(urlString: String): String {
+    val url = URL(urlString)
+    val connection = url.openConnection() as HttpURLConnection
+    connection.requestMethod = "GET"
+    connection.connectTimeout = REQUEST_TIMEOUT_MS.toInt()
+    connection.readTimeout = REQUEST_TIMEOUT_MS.toInt()
+    connection.setRequestProperty("Accept", "text/plain")
+    connection.setRequestProperty("User-Agent", "KSU-MD3E/$CURRENT_VERSION")
+
+    return try {
+        if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+            throw Exception("HTTP ${connection.responseCode}: ${connection.responseMessage}")
+        }
+        connection.inputStream.bufferedReader().readText().trim()
+    } finally {
+        connection.disconnect()
+    }
+}
+
+data class SemanticVersion(val major: Int, val minor: Int, val patch: Int) : Comparable<SemanticVersion> {
+    override fun compareTo(other: SemanticVersion): Int {
+        val m = major.compareTo(other.major)
+        if (m != 0) return m
+        val n = minor.compareTo(other.minor)
+        if (n != 0) return n
+        return patch.compareTo(other.patch)
+    }
+}
+
+private fun parseSemanticVersion(version: String): SemanticVersion? {
+    val parts = version.trim().removePrefix("v").removePrefix("V").split(".")
+    if (parts.isEmpty()) return null
+    val major = parts.getOrNull(0)?.trim()?.toIntOrNull() ?: return null
+    val minor = parts.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
+    val patch = parts.getOrNull(2)?.trim()?.toIntOrNull() ?: 0
+    return SemanticVersion(major, minor, patch)
+}
+
+private fun newer(a: SemanticVersion, b: SemanticVersion): Boolean = a > b
 
 private sealed class UpdateResult {
     data class NewVersion(val version: String) : UpdateResult()
