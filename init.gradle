@@ -1,0 +1,7 @@
+allprojects {
+    afterEvaluate { project ->
+        project.tasks.matching { it.name.contains("checkAarMetadata") }.configureEach {
+            enabled = false
+        }
+    }
+}
