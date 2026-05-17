@@ -1,7 +1,7 @@
-allprojects {
-    afterEvaluate { project ->
-        project.tasks.matching { it.name.contains("checkAarMetadata") }.configureEach {
-            enabled = false
+gradle.taskGraph.whenReady { graph ->
+    graph.allTasks.forEach { task ->
+        if (task.name.contains("checkAarMetadata")) {
+            task.enabled = false
         }
     }
 }
