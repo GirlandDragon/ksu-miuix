@@ -38,6 +38,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.ksu.miuix.shell.PackageInfo
 import com.ksu.miuix.shell.Shell
+import kotlinx.coroutines.launch
 
 private val ItemPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
 

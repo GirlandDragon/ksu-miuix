@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ksu.miuix.shell.Shell
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.launch
 
 private data class TerminalLine(val text: String, val type: LineType = LineType.Output)
 
