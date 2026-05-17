@@ -113,8 +113,8 @@ fun PackagesScreen(paddingValues: PaddingValues) {
             EmptyItem()
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                items(filteredPackages, key = { it.packageName }) { pkg ->
-                    PackageItem(pkg, onClick = { selectedPackage = pkg })
+                items(filteredPackages.size, key = { filteredPackages[it].packageName }) { index ->
+                    PackageItem(filteredPackages[index], onClick = { selectedPackage = filteredPackages[index] })
                 }
             }
         }

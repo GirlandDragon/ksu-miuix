@@ -93,13 +93,11 @@ fun SettingsScreen(paddingValues: PaddingValues) {
                 Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
                     Text(text = "检查更新", style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        text = when {
-                            checking -> "正在检查..."
-                            result != null -> when (result) {
-                                is UpdateResult.NewVersion -> "发现新版本 ${result.version}"
-                                is UpdateResult.Latest -> "已是最新版本"
-                                is UpdateResult.Error -> "检查失败"
-                            }
+                        text = when (val r = result) {
+                            null -> "点击检查 GitHub 仓库是否有新版本"
+                            is UpdateResult.NewVersion -> "发现新版本 ${r.version}"
+                            is UpdateResult.Latest -> "已是最新版本"
+                            is UpdateResult.Error -> "检查失败"
                             else -> "点击检查 GitHub 仓库是否有新版本"
                         },
                         style = MaterialTheme.typography.bodyMedium,
