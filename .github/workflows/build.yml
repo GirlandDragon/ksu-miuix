@@ -37,7 +37,7 @@ jobs:
           add-job-summary-as-pr-comment: always
 
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: gradle assembleDebug --no-daemon -P android.experimental.checkAarMetadata=false --stacktrace
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
