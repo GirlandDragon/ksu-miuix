@@ -8,6 +8,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.RestartAlt
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,27 +36,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ksu.miuix.shell.Shell
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Switch
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.overlay.OverlayDialog
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.CleaningServices
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Sync
 
 private val ItemPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
 private val IconSize = 36.dp
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
     var ksuStatus by remember { mutableStateOf<KsuStatus>(KsuStatus.Loading) }
@@ -67,9 +68,14 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
-        SmallTitle(text = "状态")
+        Text(
+            text = "状态",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+        )
 
-        Card {
+        Card(modifier = Modifier.fillMaxWidth()) {
             when (val status = ksuStatus) {
                 is KsuStatus.Active -> StatusRow(
                     icon = Icons.Default.Security,
@@ -92,32 +98,53 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             }
         }
 
-        SmallTitle(text = "设备信息")
+        Text(
+            text = "设备信息",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 24.dp, bottom = 8.dp),
+        )
 
-        Card {
-            InfoRow(Icons.Default.Memory, "内核版本", kernelVersion)
-            InfoRow(Icons.Default.PhoneAndroid, "Android 版本", androidVersion)
-            InfoRow(Icons.Default.PhoneAndroid, "设备型号", deviceModel)
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                InfoRow(Icons.Default.Memory, "内核版本", kernelVersion)
+                InfoRow(Icons.Default.PhoneAndroid, "Android 版本", androidVersion)
+                InfoRow(Icons.Default.PhoneAndroid, "设备型号", deviceModel)
+            }
         }
 
-        SmallTitle(text = "快捷操作")
+        Text(
+            text = "快捷操作",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 24.dp, bottom = 8.dp),
+        )
 
-        Card {
-            ActionRow(Icons.Default.RestartAlt, "重启设备", "执行 reboot 重启系统") { showRebootDialog = 1 }
-            ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { Shell.exec("pkill -f com.android.systemui") }
-            ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null") }
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                ActionRow(Icons.Default.RestartAlt, "重启设备", "执行 reboot 重启系统") { showRebootDialog = 1 }
+                ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { Shell.exec("pkill -f com.android.systemui") }
+                ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null") }
+            }
         }
     }
 
-    OverlayDialog(
-        show = showRebootDialog == 1,
-        title = "确认重启",
-        summary = "确定要立即重启设备吗？所有未保存的数据将会丢失。",
+    AlertDialog(
         onDismissRequest = { showRebootDialog = 0 },
-    ) {
-        TextButton(text = "取消", onClick = { showRebootDialog = 0 })
-        Button(onClick = { Shell.exec("reboot"); showRebootDialog = 0 }) { Text(text = "重启") }
-    }
+        title = { Text("确认重启") },
+        text = { Text("确定要立即重启设备吗？所有未保存的数据将会丢失。") },
+        confirmButton = {
+            Button(onClick = { Shell.exec("reboot"); showRebootDialog = 0 }) { Text("重启") }
+        },
+        dismissButton = {
+            TextButton(onClick = { showRebootDialog = 0 }) { Text("取消") }
+        },
+    )
+}
+
+@Composable
+private fun Button(onClick: () -> Unit, content: @Composable () -> Unit) {
+    androidx.compose.material3.Button(onClick = onClick, content = content)
 }
 
 @Composable
@@ -134,11 +161,11 @@ private fun StatusRow(
     ) {
         Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(IconSize))
         Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
-            Text(text = title, style = MiuixTheme.textStyles.body1)
-            Text(text = summary, style = MiuixTheme.textStyles.body2)
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(text = summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         if (isLoading) {
-            Text(text = "--", style = MiuixTheme.textStyles.body2)
+            Text(text = "--", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
             Switch(checked = isActive, onCheckedChange = null, enabled = false)
         }
@@ -153,8 +180,8 @@ private fun InfoRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title
     ) {
         Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(IconSize))
         Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
-            Text(text = title, style = MiuixTheme.textStyles.body1)
-            Text(text = summary.ifEmpty { "加载中..." }, style = MiuixTheme.textStyles.body2)
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(text = summary.ifEmpty { "加载中..." }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -166,20 +193,24 @@ private fun ActionRow(
     summary: String,
     onClick: () -> Unit,
 ) {
-    Card(cornerRadius = 0.dp, insideMargin = PaddingValues(0.dp), onClick = onClick) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = CardDefaults.shape(),
+        onClick = onClick,
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(ItemPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(IconSize))
             Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
-                Text(text = title, style = MiuixTheme.textStyles.body1)
-                Text(text = summary, style = MiuixTheme.textStyles.body2)
+                Text(text = title, style = MaterialTheme.typography.bodyLarge)
+                Text(text = summary, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MiuixTheme.colorScheme.disabledOnSurface,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

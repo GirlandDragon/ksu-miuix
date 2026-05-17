@@ -9,6 +9,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.PauseCircleOutline
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,22 +35,10 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.ksu.miuix.shell.PackageInfo
 import com.ksu.miuix.shell.Shell
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.Icon
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
-import top.yukonga.miuix.kmp.overlay.OverlayDialog
-import top.yukonga.miuix.kmp.theme.MiuixTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.PauseCircleOutline
-import androidx.compose.material.icons.filled.DeleteSweep
 
 private val ItemPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PackagesScreen(paddingValues: PaddingValues) {
     var packages by remember { mutableStateOf<List<PackageInfo>>(emptyList()) }
@@ -72,28 +73,37 @@ fun PackagesScreen(paddingValues: PaddingValues) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
-        Card {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(imageVector = Icons.Default.Apps, contentDescription = null, tint = MiuixTheme.colorScheme.onSurfaceVariantSummary)
+                Icon(
+                    imageVector = Icons.Default.Apps,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 Text(
                     text = if (searchQuery.isEmpty()) "搜索应用..." else searchQuery,
                     modifier = Modifier.weight(1f).padding(start = 10.dp),
-                    style = MiuixTheme.textStyles.body1,
-                    color = if (searchQuery.isEmpty()) MiuixTheme.colorScheme.disabledOnSurface else MiuixTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (searchQuery.isEmpty()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-            FilterChip(label = "全部", selected = filterMode == 0, onClick = { filterMode = 0 })
-            FilterChip(label = "用户", selected = filterMode == 1, onClick = { filterMode = 1 })
-            FilterChip(label = "系统", selected = filterMode == 2, onClick = { filterMode = 2 })
+            FilterChip(selected = filterMode == 0, onClick = { filterMode = 0 }, label = { Text("全部") })
+            FilterChip(selected = filterMode == 1, onClick = { filterMode = 1 }, label = { Text("用户") })
+            FilterChip(selected = filterMode == 2, onClick = { filterMode = 2 }, label = { Text("系统") })
         }
 
-        SmallTitle(text = "应用列表 (${filteredPackages.size})")
+        Text(
+            text = "应用列表 (${filteredPackages.size})",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+        )
 
         if (isLoading) {
             LoadingItem()
@@ -110,33 +120,41 @@ fun PackagesScreen(paddingValues: PaddingValues) {
     }
 
     selectedPackage?.let { pkg ->
-        OverlayDialog(
-            show = true,
-            title = pkg.appLabel,
-            summary = "${pkg.packageName} · v${pkg.versionName}",
+        AlertDialog(
             onDismissRequest = { selectedPackage = null },
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                InfoLine("版本", "${pkg.versionName} (${pkg.versionCode})")
-                InfoLine("UID", "${pkg.uid}")
-                InfoLine("类型", if (pkg.isSystem) "系统应用" else "用户应用")
-            }
-            TextButton(text = "关闭", onClick = { selectedPackage = null })
-            Button(onClick = {
-                Shell.exec("am force-stop ${pkg.packageName}")
-                selectedPackage = null
-            }) { Text(text = "强制停止") }
-            Button(onClick = {
-                Shell.exec("pm clear ${pkg.packageName}")
-                selectedPackage = null
-            }) { Text(text = "清除数据") }
-        }
+            title = { Text(pkg.appLabel) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    InfoLine("版本", "${pkg.versionName} (${pkg.versionCode})")
+                    InfoLine("UID", "${pkg.uid}")
+                    InfoLine("类型", if (pkg.isSystem) "系统应用" else "用户应用")
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    Shell.exec("am force-stop ${pkg.packageName}")
+                    selectedPackage = null
+                }) { Text("强制停止") }
+            },
+            dismissButton = {
+                TextButton(onClick = { selectedPackage = null }) { Text("关闭") }
+            },
+        )
     }
 }
 
 @Composable
+private fun Button(onClick: () -> Unit, content: @Composable () -> Unit) {
+    androidx.compose.material3.Button(onClick = onClick, content = content)
+}
+
+@Composable
 private fun PackageItem(pkg: PackageInfo, onClick: () -> Unit) {
-    Card(cornerRadius = 0.dp, insideMargin = PaddingValues(0.dp), onClick = onClick) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = CardDefaults.shape(),
+        onClick = onClick,
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(ItemPadding),
             verticalAlignment = Alignment.CenterVertically,
@@ -147,58 +165,57 @@ private fun PackageItem(pkg: PackageInfo, onClick: () -> Unit) {
                 modifier = Modifier.size(40.dp),
             )
             Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
-                Text(text = pkg.appLabel, style = MiuixTheme.textStyles.body1)
-                Text(text = buildString {
-                    append(pkg.packageName)
-                    append(" · v${pkg.versionName}")
-                    if (pkg.isSystem) append(" · 系统")
-                }, style = MiuixTheme.textStyles.body2)
+                Text(text = pkg.appLabel, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = buildString {
+                        append(pkg.packageName)
+                        append(" · v${pkg.versionName}")
+                        if (pkg.isSystem) append(" · 系统")
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = MiuixTheme.colorScheme.disabledOnSurface,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
 }
 
 @Composable
-private fun FilterChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    Card(
-        cornerRadius = 999.dp,
-        insideMargin = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-        onClick = onClick,
-    ) {
-        Text(
-            text = label,
-            style = MiuixTheme.textStyles.footnote1,
-            color = if (selected) MiuixTheme.colorScheme.onPrimary else MiuixTheme.colorScheme.onSurfaceVariantActions,
-        )
-    }
-}
-
-@Composable
 private fun LoadingItem() {
-    Card {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(ItemPadding),
             horizontalArrangement = Arrangement.Center,
         ) {
-            Text(text = "正在加载应用列表...", style = MiuixTheme.textStyles.body2)
+            Text(text = "正在加载应用列表...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
 private fun EmptyItem() {
-    Card {
+    Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(imageVector = Icons.Default.Apps, contentDescription = null, tint = MiuixTheme.colorScheme.disabledOnSurface)
-            Text(text = "没有找到匹配的应用", style = MiuixTheme.textStyles.body2, modifier = Modifier.padding(top = 8.dp))
+            Icon(
+                imageVector = Icons.Default.Apps,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(48.dp),
+            )
+            Text(
+                text = "没有找到匹配的应用",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
     }
 }
@@ -206,7 +223,7 @@ private fun EmptyItem() {
 @Composable
 private fun InfoLine(label: String, value: String) {
     Row(modifier = Modifier.padding(vertical = 2.dp)) {
-        Text(text = "$label: ", style = MiuixTheme.textStyles.body2, color = MiuixTheme.colorScheme.onSurfaceVariantSummary)
-        Text(text = value, style = MiuixTheme.textStyles.body2)
+        Text(text = "$label: ", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = value, style = MaterialTheme.typography.bodySmall)
     }
 }

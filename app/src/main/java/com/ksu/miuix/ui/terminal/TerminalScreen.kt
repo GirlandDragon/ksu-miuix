@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,18 +23,13 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ksu.miuix.shell.Shell
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.SmallTitle
-import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private data class TerminalLine(val text: String, val type: LineType = LineType.Output)
 
@@ -47,6 +46,7 @@ private val QuickCommands = listOf(
     "cat /data/adb/ksu.json" to "KSU 配置",
 )
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TerminalScreen(paddingValues: PaddingValues) {
     val lines = remember { mutableStateListOf<TerminalLine>() }
@@ -97,7 +97,7 @@ fun TerminalScreen(paddingValues: PaddingValues) {
             }
         }
 
-        Card {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
                 contentAlignment = Alignment.CenterStart,
@@ -112,8 +112,8 @@ fun TerminalScreen(paddingValues: PaddingValues) {
                     Text(
                         text = if (inputText.isEmpty()) "输入 shell 命令..." else inputText,
                         modifier = Modifier.weight(1f).padding(start = 4.dp),
-                        style = MiuixTheme.textStyles.body1,
-                        color = if (inputText.isEmpty()) MiuixTheme.colorScheme.disabledOnSurface else MiuixTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (inputText.isEmpty()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
                         fontFamily = FontFamily.Monospace,
                         fontSize = 14.sp,
                     )
@@ -123,19 +123,21 @@ fun TerminalScreen(paddingValues: PaddingValues) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             QuickCommands.forEach { (cmd, label) ->
-                Button(
+                androidx.compose.material3.AssistChip(
                     onClick = { inputText = cmd },
-                    cornerRadius = 999.dp,
-                    insideMargin = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                ) {
-                    Text(text = label, style = MiuixTheme.textStyles.footnote1)
-                }
+                    label = { Text(label, style = MaterialTheme.typography.labelMedium) },
+                )
             }
         }
 
-        SmallTitle(text = "使用说明")
+        Text(
+            text = "使用说明",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+        )
 
-        Card {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.fillMaxWidth().padding(ItemPaddingInner), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 HelpItem("Root Shell", "所有命令均以 root 身份执行")
                 HelpItem("快捷命令", "点击上方标签快速填入")
@@ -148,8 +150,8 @@ fun TerminalScreen(paddingValues: PaddingValues) {
 @Composable
 private fun HelpItem(title: String, desc: String) {
     Row(modifier = Modifier.fillMaxWidth()) {
-        Text(text = title, style = MiuixTheme.textStyles.body1, modifier = Modifier.weight(1f))
-        Text(text = desc, style = MiuixTheme.textStyles.body2)
+        Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Text(text = desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
