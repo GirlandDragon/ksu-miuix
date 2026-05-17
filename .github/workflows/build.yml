@@ -28,6 +28,7 @@ jobs:
         run: |
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager "platforms;android-37.0" "build-tools;35.0.0"
+          ln -sf $ANDROID_SDK_ROOT/platforms/android-37.0 $ANDROID_SDK_ROOT/platforms/android-37 || true
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
