@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
     var deviceModel by remember { mutableStateOf("") }
     var showRebootDialog by remember { mutableIntStateOf(0) }
     var showClearCacheDialog by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         kernelVersion = Shell.su("uname -r").stdout.ifEmpty { "未知" }
@@ -121,7 +123,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
         Card(modifier = Modifier.fillMaxWidth()) {
             Column {
                 ActionRow(Icons.Default.RestartAlt, "重启设备", "执行 reboot 重启系统") { showRebootDialog = 1 }
-                ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { Shell.exec("pkill -f com.android.systemui") }
+                ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { scope.launch { Shell.exec("pkill -f com.android.systemui") } }
                 ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { showClearCacheDialog = 1 }
             }
         }
@@ -133,7 +135,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             title = { Text("确认重启") },
             text = { Text("确定要立即重启设备吗？所有未保存的数据将会丢失。") },
             confirmButton = {
-                Button(onClick = { Shell.exec("reboot"); showRebootDialog = 0 }) { Text("重启") }
+                Button(onClick = { scope.launch { Shell.exec("reboot") }; showRebootDialog = 0 }) { Text("重启") }
             },
             dismissButton = {
                 TextButton(onClick = { showRebootDialog = 0 }) { Text("取消") }
@@ -147,7 +149,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             title = { Text("确认清除缓存") },
             text = { Text("确定要清除所有应用的缓存数据吗？部分应用可能需要重新加载数据。") },
             confirmButton = {
-                Button(onClick = { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null"); showClearCacheDialog = 0 }) { Text("清除") }
+                Button(onClick = { scope.launch { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null") }; showClearCacheDialog = 0 }) { Text("清除") }
             },
             dismissButton = {
                 TextButton(onClick = { showClearCacheDialog = 0 }) { Text("取消") }

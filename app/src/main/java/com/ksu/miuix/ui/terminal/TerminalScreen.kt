@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,6 +59,7 @@ fun TerminalScreen(paddingValues: PaddingValues) {
     val lines = remember { mutableStateListOf<TerminalLine>() }
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         lines.add(TerminalLine("KernelSU Terminal — Root Shell", LineType.Info))
@@ -149,7 +151,7 @@ fun TerminalScreen(paddingValues: PaddingValues) {
                             .padding(start = 4.dp)
                             .onKeyEvent { keyEvent ->
                                 if (keyEvent.key == Key.Enter) {
-                                    executeCommand(inputText)
+                                    scope.launch { executeCommand(inputText) }
                                     true
                                 } else false
                             },

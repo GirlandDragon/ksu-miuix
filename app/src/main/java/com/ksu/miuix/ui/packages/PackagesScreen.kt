@@ -1,6 +1,7 @@
 package com.ksu.miuix.ui.packages
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +50,7 @@ fun PackagesScreen(paddingValues: PaddingValues) {
     var filterMode by remember { mutableIntStateOf(0) }
     var selectedPackage by remember { mutableStateOf<PackageInfo?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         isLoading = true
@@ -131,7 +134,7 @@ fun PackagesScreen(paddingValues: PaddingValues) {
             },
             confirmButton = {
                 Button(onClick = {
-                    Shell.exec("am force-stop ${pkg.packageName}")
+                    scope.launch { Shell.exec("am force-stop ${pkg.packageName}") }
                     selectedPackage = null
                 }) { Text("强制停止") }
             },
