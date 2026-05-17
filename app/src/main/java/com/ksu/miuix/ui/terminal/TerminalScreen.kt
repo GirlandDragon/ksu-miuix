@@ -12,8 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,12 +45,10 @@ private val QuickCommands = listOf(
     "cat /data/adb/ksu.json" to "KSU 配置",
 )
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TerminalScreen(paddingValues: PaddingValues) {
     val lines = remember { mutableStateListOf<TerminalLine>() }
     var inputText by remember { mutableStateOf("") }
-    var isRunning by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
@@ -123,7 +120,7 @@ fun TerminalScreen(paddingValues: PaddingValues) {
 
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             QuickCommands.forEach { (cmd, label) ->
-                androidx.compose.material3.AssistChip(
+                AssistChip(
                     onClick = { inputText = cmd },
                     label = { Text(label, style = MaterialTheme.typography.labelMedium) },
                 )
