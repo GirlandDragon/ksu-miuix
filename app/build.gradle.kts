@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.ksu.miuix"
-    compileSdk = 37
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.ksu.miuix"
