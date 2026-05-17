@@ -16,7 +16,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.ksu.miuix.ui.home.HomeScreen
@@ -26,8 +26,8 @@ import com.ksu.miuix.ui.terminal.TerminalScreen
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun KsuMiuixApp() {
-    var selectedTab by remember { mutableIntStateOf(0) }
-    var showAboutDialog by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableStateOf(0) }
+    var showAboutDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -67,15 +67,15 @@ fun KsuMiuixApp() {
         },
     ) { paddingValues ->
         when (selectedTab) {
-            0 -> HomeScreen(paddingValues, onAboutClick = { showAboutDialog = 1 })
+            0 -> HomeScreen(paddingValues, onAboutClick = { showAboutDialog = true })
             1 -> PackagesScreen(paddingValues)
             2 -> TerminalScreen(paddingValues)
         }
     }
 
-    if (showAboutDialog == 1) {
+    if (showAboutDialog) {
         AlertDialog(
-            onDismissRequest = { showAboutDialog = 0 },
+            onDismissRequest = { showAboutDialog = false },
             title = { Text("关于") },
             text = {
                 Text(
@@ -83,7 +83,7 @@ fun KsuMiuixApp() {
                 )
             },
             confirmButton = {
-                TextButton(onClick = { showAboutDialog = 0 }) {
+                TextButton(onClick = { showAboutDialog = false }) {
                     Text("确定")
                 }
             },

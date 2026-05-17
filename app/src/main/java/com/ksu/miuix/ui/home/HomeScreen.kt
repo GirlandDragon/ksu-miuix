@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.RestartAlt
@@ -22,7 +23,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.ksu.miuix.shell.KsuStatus
 import com.ksu.miuix.shell.Shell
 
 private val ItemPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)
@@ -49,17 +50,14 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
     var androidVersion by remember { mutableStateOf("") }
     var deviceModel by remember { mutableStateOf("") }
     var showRebootDialog by remember { mutableIntStateOf(0) }
+    var showClearCacheDialog by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         kernelVersion = Shell.su("uname -r").stdout.ifEmpty { "未知" }
         androidVersion = Shell.su("getprop ro.build.version.release").stdout.ifEmpty { "未知" }
         deviceModel = Shell.su("getprop ro.product.model").stdout.ifEmpty { "未知" }
 
-        ksuStatus = if (kernelVersion.contains("KSU")) {
-            KsuStatus.Active(kernelVersion)
-        } else {
-            KsuStatus.Inactive(kernelVersion)
-        }
+        ksuStatus = Shell.detectKsu()
     }
 
     Column(
@@ -67,7 +65,6 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             .fillMaxSize()
             .padding(paddingValues)
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         Text(
             text = "状态",
@@ -81,7 +78,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
                 is KsuStatus.Active -> StatusRow(
                     icon = Icons.Default.Security,
                     title = "KernelSU",
-                    summary = status.kernelInfo,
+                    summary = status.info,
                     isActive = true,
                 )
                 is KsuStatus.Inactive -> StatusRow(
@@ -125,7 +122,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             Column {
                 ActionRow(Icons.Default.RestartAlt, "重启设备", "执行 reboot 重启系统") { showRebootDialog = 1 }
                 ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { Shell.exec("pkill -f com.android.systemui") }
-                ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null") }
+                ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { showClearCacheDialog = 1 }
             }
         }
     }
@@ -140,6 +137,20 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             },
             dismissButton = {
                 TextButton(onClick = { showRebootDialog = 0 }) { Text("取消") }
+            },
+        )
+    }
+
+    if (showClearCacheDialog == 1) {
+        AlertDialog(
+            onDismissRequest = { showClearCacheDialog = 0 },
+            title = { Text("确认清除缓存") },
+            text = { Text("确定要清除所有应用的缓存数据吗？部分应用可能需要重新加载数据。") },
+            confirmButton = {
+                Button(onClick = { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null"); showClearCacheDialog = 0 }) { Text("清除") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearCacheDialog = 0 }) { Text("取消") }
             },
         )
     }
@@ -165,7 +176,12 @@ private fun StatusRow(
         if (isLoading) {
             Text(text = "--", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         } else {
-            Switch(checked = isActive, onCheckedChange = null, enabled = false)
+            Icon(
+                imageVector = if (isActive) Icons.Default.CheckCircle else Icons.Default.Security,
+                contentDescription = if (isActive) "已激活" else "未激活",
+                tint = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                modifier = Modifier.size(24.dp),
+            )
         }
     }
 }
@@ -211,10 +227,4 @@ private fun ActionRow(
             )
         }
     }
-}
-
-private sealed class KsuStatus {
-    data object Loading : KsuStatus()
-    data class Active(val kernelInfo: String) : KsuStatus()
-    data class Inactive(val kernelInfo: String) : KsuStatus()
 }

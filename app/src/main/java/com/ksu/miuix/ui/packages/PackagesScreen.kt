@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Apps
@@ -19,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,8 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.ksu.miuix.shell.PackageInfo
 import com.ksu.miuix.shell.Shell
 
@@ -73,22 +75,20 @@ fun PackagesScreen(paddingValues: PaddingValues) {
 
     Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
         Card(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Apps,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = if (searchQuery.isEmpty()) "搜索应用..." else searchQuery,
-                    modifier = Modifier.weight(1f).padding(start = 10.dp),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (searchQuery.isEmpty()) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.onSurface,
-                )
-            }
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth().padding(4.dp),
+                placeholder = { Text("搜索应用...", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.outline) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Apps,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                },
+                singleLine = true,
+            )
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
@@ -110,7 +110,7 @@ fun PackagesScreen(paddingValues: PaddingValues) {
             EmptyItem()
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                items(filteredPackages.size) { index ->
+                items(filteredPackages.size, key = { index -> filteredPackages[index].packageName }) { index ->
                     val pkg = filteredPackages[index]
                     PackageItem(pkg, onClick = { selectedPackage = pkg })
                 }
@@ -152,11 +152,17 @@ private fun PackageItem(pkg: PackageInfo, onClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(ItemPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AsyncImage(
-                model = "https://play.google.com/store/apps/details?id=${pkg.packageName}",
-                contentDescription = null,
+            Card(
                 modifier = Modifier.size(40.dp),
-            )
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = pkg.appLabel.firstOrNull()?.uppercase() ?: "?",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+            }
             Column(modifier = Modifier.weight(1f).padding(start = 16.dp)) {
                 Text(text = pkg.appLabel, style = MaterialTheme.typography.bodyLarge)
                 Text(

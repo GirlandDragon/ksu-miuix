@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.navigation.compose)
     implementation(libs.coil.compose)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 
     debugImplementation(libs.compose.ui.tooling)
 }
