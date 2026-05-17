@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Apps
@@ -34,7 +33,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.ksu.miuix.shell.PackageInfo
 import com.ksu.miuix.shell.Shell
@@ -51,6 +49,7 @@ fun PackagesScreen(paddingValues: PaddingValues) {
     var filterMode by remember { mutableIntStateOf(0) }
     var selectedPackage by remember { mutableStateOf<PackageInfo?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var showForceStopDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
@@ -114,12 +113,29 @@ fun PackagesScreen(paddingValues: PaddingValues) {
             EmptyItem()
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(0.dp)) {
-                items(filteredPackages.size, key = { index -> filteredPackages[index].packageName }) { index ->
-                    val pkg = filteredPackages[index]
+                items(filteredPackages, key = { it.packageName }) { pkg ->
                     PackageItem(pkg, onClick = { selectedPackage = pkg })
                 }
-            }
-        }
+    if (showForceStopDialog && selectedPackage != null) {
+        AlertDialog(
+            onDismissRequest = { showForceStopDialog = false },
+            title = { Text("确认强制停止") },
+            text = {
+                Text("确定要强制停止 ${selectedPackage!!.appLabel} 吗？\n\n应用将被立即终止，未保存的数据可能丢失。")
+            },
+            confirmButton = {
+                Button(onClick = {
+                    scope.launch { Shell.exec("am force-stop ${selectedPackage!!.packageName}") }
+                    selectedPackage = null
+                    showForceStopDialog = false
+                }) { Text("强制停止") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showForceStopDialog = false }) { Text("取消") }
+            },
+        )
+    }
+}
     }
 
     selectedPackage?.let { pkg ->
@@ -135,8 +151,7 @@ fun PackagesScreen(paddingValues: PaddingValues) {
             },
             confirmButton = {
                 Button(onClick = {
-                    scope.launch { Shell.exec("am force-stop ${pkg.packageName}") }
-                    selectedPackage = null
+                    showForceStopDialog = true
                 }) { Text("强制停止") }
             },
             dismissButton = {

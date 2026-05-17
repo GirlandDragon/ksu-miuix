@@ -1,6 +1,5 @@
 package com.ksu.miuix.ui.home
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.RestartAlt
@@ -52,6 +52,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
     var androidVersion by remember { mutableStateOf("") }
     var deviceModel by remember { mutableStateOf("") }
     var showRebootDialog by remember { mutableIntStateOf(0) }
+    var showRestartUiDialog by remember { mutableIntStateOf(0) }
     var showClearCacheDialog by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
 
@@ -110,7 +111,7 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
             Column {
                 InfoRow(Icons.Default.Memory, "内核版本", kernelVersion)
                 InfoRow(Icons.Default.PhoneAndroid, "Android 版本", androidVersion)
-                InfoRow(Icons.Default.PhoneAndroid, "设备型号", deviceModel)
+                InfoRow(Icons.Default.Devices, "设备型号", deviceModel)
             }
         }
 
@@ -124,8 +125,8 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
         Card(modifier = Modifier.fillMaxWidth()) {
             Column {
                 ActionRow(Icons.Default.RestartAlt, "重启设备", "执行 reboot 重启系统") { showRebootDialog = 1 }
-                ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { scope.launch { Shell.exec("pkill -f com.android.systemui") } }
-                ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理 /data/data 下缓存目录") { showClearCacheDialog = 1 }
+                ActionRow(Icons.Default.Sync, "重启 SystemUI", "刷新界面而不完全重启") { showRestartUiDialog = 1 }
+                ActionRow(Icons.Default.CleaningServices, "清除应用缓存", "清理用户应用缓存目录") { showClearCacheDialog = 1 }
             }
         }
     }
@@ -144,13 +145,32 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
         )
     }
 
+    if (showRestartUiDialog == 1) {
+        AlertDialog(
+            onDismissRequest = { showRestartUiDialog = 0 },
+            title = { Text("确认重启 SystemUI") },
+            text = { Text("确定要重启 SystemUI 吗？\n\n这将导致界面短暂闪烁，正在进行的操作可能中断。") },
+            confirmButton = {
+                Button(onClick = { scope.launch { Shell.exec("pkill -f com.android.systemui") }; showRestartUiDialog = 0 }) { Text("重启") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRestartUiDialog = 0 }) { Text("取消") }
+            },
+        )
+    }
+
     if (showClearCacheDialog == 1) {
         AlertDialog(
             onDismissRequest = { showClearCacheDialog = 0 },
-            title = { Text("确认清除缓存") },
-            text = { Text("确定要清除所有应用的缓存数据吗？部分应用可能需要重新加载数据。") },
+            title = { Text("警告：清除应用缓存") },
+            text = { Text("此操作将清除所有用户应用的缓存数据。\n\n可能的影响：\n• 部分应用需要重新加载\n• 已登录的应用可能需要重新登录\n• 应用首次启动会变慢\n\n⚠️ 此操作不可逆，请确认继续。") },
             confirmButton = {
-                Button(onClick = { scope.launch { Shell.exec("rm -rf /data/data/*/cache/* 2>/dev/null") }; showClearCacheDialog = 0 }) { Text("清除") }
+                Button(onClick = {
+                    scope.launch {
+                        Shell.exec("for d in /data/data/*/cache; do rm -rf \"$d\" 2>/dev/null; done")
+                    }
+                    showClearCacheDialog = 0
+                }) { Text("确认清除") }
             },
             dismissButton = {
                 TextButton(onClick = { showClearCacheDialog = 0 }) { Text("取消") }

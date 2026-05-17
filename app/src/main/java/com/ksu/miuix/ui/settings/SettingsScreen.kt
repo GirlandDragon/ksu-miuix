@@ -166,7 +166,7 @@ private suspend fun checkUpdate(): UpdateResult = withContext(Dispatchers.IO) {
             }
         }
 
-        if (isNewer(remote, current)) {
+        if (remote > current) {
             UpdateResult.NewVersion(remoteVersion)
         } else {
             UpdateResult.Latest
@@ -221,8 +221,6 @@ private fun parseSemanticVersion(version: String): SemanticVersion? {
     val patch = parts.getOrNull(2)?.trim()?.toIntOrNull() ?: 0
     return SemanticVersion(major, minor, patch)
 }
-
-private fun newer(a: SemanticVersion, b: SemanticVersion): Boolean = a > b
 
 private sealed class UpdateResult {
     data class NewVersion(val version: String) : UpdateResult()

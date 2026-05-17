@@ -48,19 +48,19 @@ fun KsuMiuixApp() {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "首页") },
                     label = { Text("首页") },
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.Apps, contentDescription = null) },
+                    icon = { Icon(Icons.Default.Apps, contentDescription = "应用") },
                     label = { Text("应用") },
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "设置") },
                     label = { Text("设置") },
                 )
             }
