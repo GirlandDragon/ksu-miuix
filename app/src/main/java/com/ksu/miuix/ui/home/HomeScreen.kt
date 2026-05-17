@@ -129,17 +129,19 @@ fun HomeScreen(paddingValues: PaddingValues, onAboutClick: () -> Unit) {
         }
     }
 
-    AlertDialog(
-        onDismissRequest = { showRebootDialog = 0 },
-        title = { Text("确认重启") },
-        text = { Text("确定要立即重启设备吗？所有未保存的数据将会丢失。") },
-        confirmButton = {
-            Button(onClick = { Shell.exec("reboot"); showRebootDialog = 0 }) { Text("重启") }
-        },
-        dismissButton = {
-            TextButton(onClick = { showRebootDialog = 0 }) { Text("取消") }
-        },
-    )
+    if (showRebootDialog == 1) {
+        AlertDialog(
+            onDismissRequest = { showRebootDialog = 0 },
+            title = { Text("确认重启") },
+            text = { Text("确定要立即重启设备吗？所有未保存的数据将会丢失。") },
+            confirmButton = {
+                Button(onClick = { Shell.exec("reboot"); showRebootDialog = 0 }) { Text("重启") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRebootDialog = 0 }) { Text("取消") }
+            },
+        )
+    }
 }
 
 @Composable
